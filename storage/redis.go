@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	
 	"gopkg.in/redis.v3"
 
-	"github.com/sammy007/open-ethereum-pool/util"
+	"github.com/NotoriousPyro/open-metaverse-pool/util"
 )
 
 type Config struct {
@@ -46,7 +46,7 @@ type BlockData struct {
 }
 
 func (b *BlockData) RewardInShannon() int64 {
-	reward := new(big.Int).Div(b.Reward, util.Shannon)
+	reward := new(big.Int).Div(b.Reward, util.Satoshi)
 	return reward.Int64()
 }
 
@@ -116,6 +116,45 @@ func (r *RedisClient) GetWhitelist() ([]string, error) {
 		return []string{}, cmd.Err()
 	}
 	return cmd.Val(), nil
+}
+
+func (r *RedisClient) WriteStratumState(nodeId string, id string, listen string, minerCount int, diff int64) error {
+	tx := r.client.Multi()
+	defer tx.Close()
+
+	_, err := tx.Exec(func() error {
+		tx.HSet(r.formatKey("nodes", nodeId), join(id, "name"), id)
+		tx.HSet(r.formatKey("nodes", nodeId), join(id, "listen"), listen)
+		tx.HSet(r.formatKey("nodes", nodeId), join(id, "difficulty"), strconv.FormatInt(diff, 10))
+		tx.HSet(r.formatKey("nodes", nodeId), join(id, "minerCount"), strconv.FormatInt(int64(minerCount), 10))
+		return nil
+	})
+	return err
+}
+
+func (r *RedisClient) GetStratumStates(nodeId string) ([]map[string]interface{}, error) {
+	cmd := r.client.HGetAllMap(r.formatKey("nodes", nodeId))
+	if cmd.Err() != nil {
+		return nil, cmd.Err()
+	}
+	m := make(map[string]map[string]interface{})
+	for key, value := range cmd.Val() {
+		parts := strings.Split(key, ":")
+		if val, ok := m[parts[0]]; ok {
+			val[parts[1]] = value
+		} else {
+			stratum := make(map[string]interface{})
+			stratum[parts[1]] = value
+			m[parts[0]] = stratum
+		}
+	}
+	v := make([]map[string]interface{}, len(m), len(m))
+	i := 0
+	for _, value := range m {
+		v[i] = value
+		i++
+	}
+	return v, nil
 }
 
 func (r *RedisClient) WriteNodeState(id string, height uint64, diff *big.Int) error {

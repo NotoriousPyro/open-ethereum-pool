@@ -5,44 +5,43 @@ import (
 	"log"
 	"net/http"
 	"sort"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/mux"
 
-	"github.com/sammy007/open-ethereum-pool/storage"
-	"github.com/sammy007/open-ethereum-pool/util"
+	"github.com/NotoriousPyro/open-metaverse-pool/storage"
+	"github.com/NotoriousPyro/open-metaverse-pool/util"
 )
 
 type ApiConfig struct {
-	Enabled              bool   `json:"enabled"`
-	Listen               string `json:"listen"`
-	StatsCollectInterval string `json:"statsCollectInterval"`
-	HashrateWindow       string `json:"hashrateWindow"`
-	HashrateLargeWindow  string `json:"hashrateLargeWindow"`
-	LuckWindow           []int  `json:"luckWindow"`
-	Payments             int64  `json:"payments"`
-	Blocks               int64  `json:"blocks"`
-	PurgeOnly            bool   `json:"purgeOnly"`
-	PurgeInterval        string `json:"purgeInterval"`
+	Enabled						bool		`json:"enabled"`
+	Listen						string		`json:"listen"`
+	StatsCollectInterval		string		`json:"statsCollectInterval"`
+	HashrateWindow				string		`json:"hashrateWindow"`
+	HashrateLargeWindow			string		`json:"hashrateLargeWindow"`
+	LuckWindow					[]int		`json:"luckWindow"`
+	Payments					int64		`json:"payments"`
+	Blocks						int64		`json:"blocks"`
+	PurgeOnly					bool		`json:"purgeOnly"`
+	PurgeInterval				string		`json:"purgeInterval"`
 }
 
 type ApiServer struct {
-	config              *ApiConfig
-	backend             *storage.RedisClient
-	hashrateWindow      time.Duration
-	hashrateLargeWindow time.Duration
-	stats               atomic.Value
-	miners              map[string]*Entry
-	minersMu            sync.RWMutex
-	statsIntv           time.Duration
+	config					*ApiConfig
+	backend					*storage.RedisClient
+	hashrateWindow			time.Duration
+	hashrateLargeWindow		time.Duration
+	stats					atomic.Value
+	miners					map[string]*Entry
+	minersMu				sync.RWMutex
+	statsIntv				time.Duration
 }
 
 type Entry struct {
-	stats     map[string]interface{}
-	updatedAt int64
+	stats			map[string]interface{}
+	updatedAt		int64
 }
 
 func NewApiServer(cfg *ApiConfig, backend *storage.RedisClient) *ApiServer {
@@ -107,7 +106,7 @@ func (s *ApiServer) listen() {
 	r.HandleFunc("/api/miners", s.MinersIndex)
 	r.HandleFunc("/api/blocks", s.BlocksIndex)
 	r.HandleFunc("/api/payments", s.PaymentsIndex)
-	r.HandleFunc("/api/accounts/{login:0x[0-9a-fA-F]{40}}", s.AccountIndex)
+	r.HandleFunc("/api/accounts/{login:M[A-Z0-9]{1}[0-9a-zA-Z]{32}$}", s.AccountIndex)
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	err := http.ListenAndServe(s.config.Listen, r)
 	if err != nil {
@@ -157,9 +156,31 @@ func (s *ApiServer) StatsIndex(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	reply := make(map[string]interface{})
-	nodes, err := s.backend.GetNodeStates()
+	
+	nodeStats, err := s.backend.GetNodeStates()
 	if err != nil {
 		log.Printf("Failed to get nodes stats from backend: %v", err)
+	}
+	//reply["nodes"] = nodes
+	
+	nodes := make([]map[string]interface{}, len(nodeStats))
+	for id, node := range nodeStats {
+		nodeName := node["name"].(string)
+		stratum, err := s.backend.GetStratumStates(nodeName)
+		if err != nil {
+			log.Printf("Failed to get stratum stats from backend: %v", err)
+		}
+		if stratum != nil {
+			nodes[id] = map[string]interface{}{
+				"name": nodeName,
+				"height": node["height"],
+				"difficulty": node["difficulty"],
+				"lastBeat": node["lastBeat"],
+				"stratums": stratum,
+			}
+		} else {
+			nodes[id] = node
+		}
 	}
 	reply["nodes"] = nodes
 
@@ -249,7 +270,7 @@ func (s *ApiServer) AccountIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Cache-Control", "no-cache")
 
-	login := strings.ToLower(mux.Vars(r)["login"])
+	login := mux.Vars(r)["login"]
 	s.minersMu.Lock()
 	defer s.minersMu.Unlock()
 

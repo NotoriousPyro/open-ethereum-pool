@@ -1,0 +1,115 @@
+{
+	"threads": 2,
+	"coin": "etp",
+	
+	"redis": {
+		"endpoint": "127.0.0.1:6379",
+		"poolSize": 10,
+		"database": 0,
+		"password": ""
+	},
+	
+	"account": "yourWalletAccountName",
+	"password": "yourWalletAccountPassword",
+	
+	"upstreamCheckInterval": "5s",
+	"upstream": [{
+			"name": "localhost",
+			"url": "http://127.0.0.1:8820/rpc/v3",
+			"timeout": "2s"
+		}
+	],
+	
+	"proxy": {
+		"enabled": true,
+		"listen": "0.0.0.0:8888",
+		"name": "nl.metaverse.farm",
+		"address": "MSLiK7d6JcmH6WVaq73kv4hi5J3pJnzhTV",
+		"limitHeadersSize": 1024,
+		"limitBodySize": 256,
+		"behindReverseProxy": false,
+		"blockRefreshInterval": "25ms",
+		"stateUpdateInterval": "3s",
+		"hashrateExpiration": "24h",
+		"healthCheck": true,
+		"maxFails": 100,
+		
+		"stratum": [{
+				"name": "2G",
+				"enabled": true,
+				"listen": "0.0.0.0:3002",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 2000000000
+			},{
+				"name": "4G",
+				"enabled": true,
+				"listen": "0.0.0.0:3004",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 4000000000
+			},{
+				"name": "6G",
+				"enabled": true,
+				"listen": "0.0.0.0:3006",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 6000000000
+			},{
+				"name": "8G",
+				"enabled": true,
+				"listen": "0.0.0.0:3008",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 8000000000
+			},{
+				"name": "1T",
+				"enabled": true,
+				"listen": "0.0.0.0:3010",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 10000000000
+			},{
+				"name": "1.2T",
+				"enabled": true,
+				"listen": "0.0.0.0:3012",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 12000000000
+			},{
+				"name": "1.4T",
+				"enabled": true,
+				"listen": "0.0.0.0:3014",
+				"timeout": "60s",
+				"maxConn": 8192,
+				"difficulty": 14000000000
+			}
+		],
+		
+		"policy": {
+			"workers": 8,
+			"resetInterval": "60m",
+			"refreshInterval": "1m",
+
+			"banning": {
+				"enabled": false,
+				"ipset": "blacklist",
+				"timeout": 1800,
+				"invalidPercent": 50,
+				"checkThreshold": 30,
+				"malformedLimit": 0
+			},
+			"limits": {
+				"enabled": false,
+				"limit": 30,
+				"grace": "5m",
+				"limitJump": 10
+			}
+		}
+	},
+	
+	"newrelicEnabled": false,
+	"newrelicName": "MyEtherProxy",
+	"newrelicKey": "SECRET_KEY",
+	"newrelicVerbose": false
+}

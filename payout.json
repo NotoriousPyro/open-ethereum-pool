@@ -1,0 +1,30 @@
+{
+	"threads": 1,
+	"coin": "etp",
+
+	"redis": {
+		"endpoint": "127.0.0.1:6379",
+		"poolSize": 10,
+		"database": 0,
+		"password": ""
+	},
+	
+	"account": "yourWalletAccountName",
+	"password": "yourWalletAccountPassword",
+
+	"payouts": {
+		"enabled": true,
+		"daemon": "http://127.0.0.1:8820/rpc/v3",
+		"address": "MSLiK7d6JcmH6WVaq73kv4hi5J3pJnzhTV",
+		"interval": "2h",
+		"timeout": "10s",
+		"requirePeers": 5,
+		"threshold": 100000000,
+		"bgsave": false
+	},
+
+	"newrelicEnabled": false,
+	"newrelicName": "MyEtherProxy",
+	"newrelicKey": "SECRET_KEY",
+	"newrelicVerbose": false
+}

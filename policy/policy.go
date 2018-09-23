@@ -9,59 +9,59 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/sammy007/open-ethereum-pool/storage"
-	"github.com/sammy007/open-ethereum-pool/util"
+	"github.com/NotoriousPyro/open-metaverse-pool/storage"
+	"github.com/NotoriousPyro/open-metaverse-pool/util"
 )
 
 type Config struct {
-	Workers         int     `json:"workers"`
-	Banning         Banning `json:"banning"`
-	Limits          Limits  `json:"limits"`
-	ResetInterval   string  `json:"resetInterval"`
-	RefreshInterval string  `json:"refreshInterval"`
+	Workers				int			`json:"workers"`
+	Banning				Banning		`json:"banning"`
+	Limits				Limits		`json:"limits"`
+	ResetInterval		string		`json:"resetInterval"`
+	RefreshInterval		string		`json:"refreshInterval"`
 }
 
 type Limits struct {
-	Enabled   bool   `json:"enabled"`
-	Limit     int32  `json:"limit"`
-	Grace     string `json:"grace"`
-	LimitJump int32  `json:"limitJump"`
+	Enabled				bool		`json:"enabled"`
+	Limit				int32		`json:"limit"`
+	Grace				string		`json:"grace"`
+	LimitJump			int32		`json:"limitJump"`
 }
 
 type Banning struct {
-	Enabled        bool    `json:"enabled"`
-	IPSet          string  `json:"ipset"`
-	Timeout        int64   `json:"timeout"`
-	InvalidPercent float32 `json:"invalidPercent"`
-	CheckThreshold int32   `json:"checkThreshold"`
-	MalformedLimit int32   `json:"malformedLimit"`
+	Enabled				bool		`json:"enabled"`
+	IPSet				string		`json:"ipset"`
+	Timeout				int64		`json:"timeout"`
+	InvalidPercent		float32		`json:"invalidPercent"`
+	CheckThreshold		int32		`json:"checkThreshold"`
+	MalformedLimit		int32		`json:"malformedLimit"`
 }
 
 type Stats struct {
 	sync.Mutex
 	// We are using atomic with LastBeat,
 	// so moving it before the rest in order to avoid alignment issue
-	LastBeat      int64
-	BannedAt      int64
-	ValidShares   int32
-	InvalidShares int32
-	Malformed     int32
-	ConnLimit     int32
-	Banned        int32
+	LastBeat			int64
+	BannedAt			int64
+	ValidShares			int32
+	InvalidShares		int32
+	Malformed			int32
+	ConnLimit			int32
+	Banned				int32
 }
 
 type PolicyServer struct {
 	sync.RWMutex
-	statsMu    sync.Mutex
-	config     *Config
-	stats      map[string]*Stats
-	banChannel chan string
-	startedAt  int64
-	grace      int64
-	timeout    int64
-	blacklist  []string
-	whitelist  []string
-	storage    *storage.RedisClient
+	statsMu			sync.Mutex
+	config			*Config
+	stats			map[string]*Stats
+	banChannel		chan string
+	startedAt		int64
+	grace			int64
+	timeout			int64
+	blacklist		[]string
+	whitelist		[]string
+	storage			*storage.RedisClient
 }
 
 func Start(cfg *Config, storage *storage.RedisClient) *PolicyServer {

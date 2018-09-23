@@ -1,5 +1,3 @@
-// +build go1.9
-
 package main
 
 import (
@@ -13,10 +11,10 @@ import (
 
 	"github.com/yvasiyarov/gorelic"
 
-	"github.com/sammy007/open-ethereum-pool/api"
-	"github.com/sammy007/open-ethereum-pool/payouts"
-	"github.com/sammy007/open-ethereum-pool/proxy"
-	"github.com/sammy007/open-ethereum-pool/storage"
+	"github.com/NotoriousPyro/open-metaverse-pool/api"
+	"github.com/NotoriousPyro/open-metaverse-pool/payouts"
+	"github.com/NotoriousPyro/open-metaverse-pool/proxy"
+	"github.com/NotoriousPyro/open-metaverse-pool/storage"
 )
 
 var cfg proxy.Config
@@ -69,6 +67,10 @@ func readConfig(cfg *proxy.Config) {
 	if err := jsonParser.Decode(&cfg); err != nil {
 		log.Fatal("Config error: ", err.Error())
 	}
+	cfg.Payouts.Account = cfg.Account
+	cfg.Payouts.Password = cfg.Password
+	cfg.BlockUnlocker.Account = cfg.Account
+	cfg.BlockUnlocker.Password = cfg.Password
 }
 
 func main() {

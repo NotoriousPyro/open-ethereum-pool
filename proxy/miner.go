@@ -12,67 +12,74 @@ import (
 
 var hasher = ethash.New()
 
-func (s *ProxyServer) processShare(login, id, ip string, t *BlockTemplate, params []string) (bool, bool) {
+// returns exist, valid, stale as boolean
+func (s *ProxyServer) processShare(login, id, ip string, t *BlockTemplate, params []string, s_id int) (bool, bool, bool) {
+	stratumConfig := s.config.Proxy.Stratum[s_id]
 	nonceHex := params[0]
 	hashNoNonce := params[1]
 	mixDigest := params[2]
 	nonce, _ := strconv.ParseUint(strings.Replace(nonceHex, "0x", "", -1), 16, 64)
-	shareDiff := s.config.Proxy.Difficulty
-
-	h, ok := t.headers[hashNoNonce]
-	if !ok {
-		log.Printf("Stale share from %v@%v", login, ip)
-		return false, false
+	shareDiff := stratumConfig.Difficulty
+	
+	if !strings.EqualFold(t.Header, hashNoNonce) {
+		// Stale Share
+		return false, false, true
 	}
-
+	
 	share := Block{
-		number:      h.height,
+		number:      t.Height,
 		hashNoNonce: common.HexToHash(hashNoNonce),
 		difficulty:  big.NewInt(shareDiff),
 		nonce:       nonce,
 		mixDigest:   common.HexToHash(mixDigest),
 	}
-
+	
 	block := Block{
-		number:      h.height,
+		number:      t.Height,
 		hashNoNonce: common.HexToHash(hashNoNonce),
-		difficulty:  h.diff,
+		difficulty:  t.Difficulty,
 		nonce:       nonce,
 		mixDigest:   common.HexToHash(mixDigest),
 	}
-
+	
 	if !hasher.Verify(share) {
-		return false, false
+		// Invalid Share
+		return false, false, false
 	}
-
+	
 	if hasher.Verify(block) {
-		ok, err := s.rpc().SubmitBlock(params)
+		ok, err := s.rpc().SubmitWork(params)
 		if err != nil {
-			log.Printf("Block submission failure at height %v for %v: %v", h.height, t.Header, err)
+			log.Printf("Block submission failure at height %v for %v: %v", t.Height, t.Header, err)
 		} else if !ok {
-			log.Printf("Block rejected at height %v for %v", h.height, t.Header)
-			return false, false
+			log.Printf("Block rejected at height %v for %v", t.Height, t.Header)
+			// Rejected Block
+			return false, false, false
 		} else {
 			s.fetchBlockTemplate()
-			exist, err := s.backend.WriteBlock(login, id, params, shareDiff, h.diff.Int64(), h.height, s.hashrateExpiration)
+			exist, err := s.backend.WriteBlock(login, id, params, shareDiff, t.Difficulty.Int64(), t.Height, s.hashrateExpiration)
 			if exist {
-				return true, false
+				// Duplicate Block
+				return true, true, false
 			}
 			if err != nil {
 				log.Println("Failed to insert block candidate into backend:", err)
 			} else {
-				log.Printf("Inserted block %v to backend", h.height)
+				// Valid Block
+				log.Printf("Inserted block %v to backend", t.Height)
 			}
-			log.Printf("Block found by miner %v@%v at height %d", login, ip, h.height)
+			log.Printf("Block found by miner %v@%v at height %d", login, ip, t.Height)
 		}
 	} else {
-		exist, err := s.backend.WriteShare(login, id, params, shareDiff, h.height, s.hashrateExpiration)
+		exist, err := s.backend.WriteShare(login, id, params, shareDiff, t.Height, s.hashrateExpiration)
 		if exist {
-			return true, false
+			// Duplicate Share
+			return true, true, false
 		}
 		if err != nil {
 			log.Println("Failed to insert share data into backend:", err)
 		}
 	}
-	return false, true
+	// Valid Share
+	return false, true, false
 }

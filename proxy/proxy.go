@@ -6,66 +6,73 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/mux"
 
-	"github.com/sammy007/open-ethereum-pool/policy"
-	"github.com/sammy007/open-ethereum-pool/rpc"
-	"github.com/sammy007/open-ethereum-pool/storage"
-	"github.com/sammy007/open-ethereum-pool/util"
+	"github.com/NotoriousPyro/open-metaverse-pool/policy"
+	"github.com/NotoriousPyro/open-metaverse-pool/rpc"
+	"github.com/NotoriousPyro/open-metaverse-pool/storage"
+	"github.com/NotoriousPyro/open-metaverse-pool/util"
 )
 
-type ProxyServer struct {
-	config             *Config
-	blockTemplate      atomic.Value
-	upstream           int32
-	upstreams          []*rpc.RPCClient
-	backend            *storage.RedisClient
-	diff               string
-	policy             *policy.PolicyServer
-	hashrateExpiration time.Duration
-	failsCount         int64
+type StratumServer struct {
+	sessionsMu	sync.RWMutex
+	sessions	map[*Session]struct{}
+	timeout		time.Duration
+	diff		string
+}
 
-	// Stratum
-	sessionsMu sync.RWMutex
-	sessions   map[*Session]struct{}
-	timeout    time.Duration
+type ProxyServer struct {
+	config					*Config
+	blockTemplate			atomic.Value
+	upstream				int32
+	upstreams				[]*rpc.RPCClient
+	backend					*storage.RedisClient
+	policy					*policy.PolicyServer
+	hashrateExpiration		time.Duration
+	failsCount				int64
+	stratum					[]*StratumServer
 }
 
 type Session struct {
-	ip  string
-	enc *json.Encoder
+	s_id	int
+	ip		string
+	enc		*json.Encoder
 
-	// Stratum
 	sync.Mutex
-	conn  *net.TCPConn
-	login string
+	conn		*net.TCPConn
+	login		string
 }
 
 func NewProxy(cfg *Config, backend *storage.RedisClient) *ProxyServer {
-	if len(cfg.Name) == 0 {
+	if len(cfg.Proxy.Name) == 0 {
 		log.Fatal("You must set instance name")
 	}
 	policy := policy.Start(&cfg.Proxy.Policy, backend)
 
 	proxy := &ProxyServer{config: cfg, backend: backend, policy: policy}
-	proxy.diff = util.GetTargetHex(cfg.Proxy.Difficulty)
-
 	proxy.upstreams = make([]*rpc.RPCClient, len(cfg.Upstream))
+	
 	for i, v := range cfg.Upstream {
-		proxy.upstreams[i] = rpc.NewRPCClient(v.Name, v.Url, v.Timeout)
+		proxy.upstreams[i] = rpc.NewRPCClient(v.Name, v.Url, cfg.Account, cfg.Password, v.Timeout)
 		log.Printf("Upstream: %s => %s", v.Name, v.Url)
 	}
 	log.Printf("Default upstream: %s => %s", proxy.rpc().Name, proxy.rpc().Url)
 
-	if cfg.Proxy.Stratum.Enabled {
-		proxy.sessions = make(map[*Session]struct{})
-		go proxy.ListenTCP()
+	proxy.stratum = make([]*StratumServer, len(cfg.Proxy.Stratum))
+	log.Printf("Total StratumServer count: %d", len(cfg.Proxy.Stratum))
+	for i, st := range cfg.Proxy.Stratum {
+		stratumserver := StratumServer{sessions: make(map[*Session]struct{}), diff: util.GetTargetHex(st.Difficulty)}
+		proxy.stratum[i] = &stratumserver
+		if st.Enabled {
+			go proxy.ListenTCP(i)
+		}
 	}
+	
+	proxy.rpc().SetAddress(cfg.Proxy.Address)
 
 	proxy.fetchBlockTemplate()
 
@@ -107,7 +114,7 @@ func NewProxy(cfg *Config, backend *storage.RedisClient) *ProxyServer {
 			case <-stateUpdateTimer.C:
 				t := proxy.currentBlockTemplate()
 				if t != nil {
-					err := backend.WriteNodeState(cfg.Name, t.Height, t.Difficulty)
+					err := backend.WriteNodeState(cfg.Proxy.Name, t.Height, t.Difficulty)
 					if err != nil {
 						log.Printf("Failed to write node state to backend: %v", err)
 						proxy.markSick()
@@ -126,8 +133,8 @@ func NewProxy(cfg *Config, backend *storage.RedisClient) *ProxyServer {
 func (s *ProxyServer) Start() {
 	log.Printf("Starting proxy on %v", s.config.Proxy.Listen)
 	r := mux.NewRouter()
-	r.Handle("/{login:0x[0-9a-fA-F]{40}}/{id:[0-9a-zA-Z-_]{1,8}}", s)
-	r.Handle("/{login:0x[0-9a-fA-F]{40}}", s)
+	r.Handle("/{login:M[A-Z0-9]{1}[0-9a-zA-Z]{32}}}/{id:[0-9a-zA-Z-_]{1,8}}", s)
+	r.Handle("/{login:M[A-Z0-9]{1}[0-9a-zA-Z]{32}}", s)
 	srv := &http.Server{
 		Addr:           s.config.Proxy.Listen,
 		Handler:        r,
@@ -216,13 +223,8 @@ func (cs *Session) handleMessage(s *ProxyServer, r *http.Request, req *JSONRpcRe
 	}
 
 	vars := mux.Vars(r)
-	login := strings.ToLower(vars["login"])
+	login := vars["login"]
 
-	if !util.IsValidHexAddress(login) {
-		errReply := &ErrorReply{Code: -1, Message: "Invalid login"}
-		cs.sendError(req.Id, errReply)
-		return
-	}
 	if !s.policy.ApplyLoginPolicy(login, cs.ip) {
 		errReply := &ErrorReply{Code: -1, Message: "You are blacklisted"}
 		cs.sendError(req.Id, errReply)
@@ -258,6 +260,7 @@ func (cs *Session) handleMessage(s *ProxyServer, r *http.Request, req *JSONRpcRe
 			errReply := &ErrorReply{Code: -1, Message: "Malformed request"}
 			cs.sendError(req.Id, errReply)
 		}
+
 	case "eth_getBlockByNumber":
 		reply := s.handleGetBlockByNumberRPC()
 		cs.sendResult(req.Id, reply)

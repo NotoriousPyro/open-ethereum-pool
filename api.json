@@ -1,0 +1,29 @@
+{
+	"threads": 2,
+	"coin": "etp",
+
+	"redis": {
+		"endpoint": "127.0.0.1:6379",
+		"poolSize": 10,
+		"database": 0,
+		"password": ""
+	},
+
+	"api": {
+		"enabled": true,
+		"listen": "0.0.0.0:8080",
+		"statsCollectInterval": "5s",
+		"purgeInterval": "10m",
+		"purgeOnly": false,
+		"hashrateWindow": "1h",
+		"hashrateLargeWindow": "24h",
+		"luckWindow": [100, 200, 400, 800, 1600, 3200, 6400, 12800],
+		"payments": 400,
+		"blocks": 400
+	},
+
+	"newrelicEnabled": false,
+	"newrelicName": "MyEtherProxy",
+	"newrelicKey": "SECRET_KEY",
+	"newrelicVerbose": false
+}
