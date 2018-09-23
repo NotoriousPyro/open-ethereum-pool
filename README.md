@@ -1,4 +1,4 @@
-## Open Source Ethereum Mining Pool
+## Open Source Metaverse Mining Pool
 
 TBA
 
