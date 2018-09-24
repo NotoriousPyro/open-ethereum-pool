@@ -7,10 +7,10 @@
 GOBIN = build/bin
 
 all:
-	build/env.sh go get -gcflags "-N -l"  -v ./...
+    build/env.sh go get -gcflags "-N -l"  -v ./...
 
 test: all
-	build/env.sh go test -v ./...
+    build/env.sh go test -v ./...
 
 clean:
-	rm -fr build/_workspace/pkg/ $(GOBIN)/*
+    rm -fr build/_workspace/pkg/ $(GOBIN)/*

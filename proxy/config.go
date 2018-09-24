@@ -42,10 +42,10 @@ type Proxy struct {
     StateUpdateInterval     string      `json:"stateUpdateInterval"`
     HashrateExpiration      string      `json:"hashrateExpiration"`
 
-    Policy                  policy.Config     `json:"policy"`
+    Policy                  policy.Config   `json:"policy"`
 
-    MaxFails                int64    `json:"maxFails"`
-    HealthCheck             bool     `json:"healthCheck"`
+    MaxFails                int64           `json:"maxFails"`
+    HealthCheck             bool            `json:"healthCheck"`
 
     Stratum                 []Stratum       `json:"stratum"`
 }

@@ -1,33 +1,33 @@
 {
-	"threads": 1,
-	"coin": "etp",
-	
-	"redis": {
-		"endpoint": "127.0.0.1:6379",
-		"poolSize": 10,
-		"database": 0,
-		"password": ""
-	},
-	
-	"account": "yourWalletAccountName",
-	"password": "yourWalletAccountPassword",
+    "threads": 1,
+    "coin": "etp",
+    
+    "redis": {
+        "endpoint": "127.0.0.1:6379",
+        "poolSize": 10,
+        "database": 0,
+        "password": ""
+    },
+    
+    "account": "yourWalletAccountName",
+    "password": "yourWalletAccountPassword",
 
-	"unlocker": {
-		"enabled": true,
-		"daemon": "http://127.0.0.1:8820/rpc/v3",
-		"address": "MSLiK7d6JcmH6WVaq73kv4hi5J3pJnzhTV",
-		"poolFeeAddress": "MAbKTbVtuRqnhQk7AF5AS2gq2F1DfiZyRv", 
-		"interval": "1m",
-		"timeout": "10s",
-		"poolFee": 0.3,
-		"donate": false,
-		"depth": 900,
-		"immatureDepth": 100,
-		"keepTxFees": false
-	},
+    "unlocker": {
+        "enabled": true,
+        "daemon": "http://127.0.0.1:8820/rpc/v3",
+        "address": "MSLiK7d6JcmH6WVaq73kv4hi5J3pJnzhTV",
+        "poolFeeAddress": "MAbKTbVtuRqnhQk7AF5AS2gq2F1DfiZyRv", 
+        "interval": "1m",
+        "timeout": "10s",
+        "poolFee": 0.3,
+        "donate": false,
+        "depth": 900,
+        "immatureDepth": 100,
+        "keepTxFees": false
+    },
 
-	"newrelicEnabled": false,
-	"newrelicName": "MyEtherProxy",
-	"newrelicKey": "SECRET_KEY",
-	"newrelicVerbose": false
+    "newrelicEnabled": false,
+    "newrelicName": "MyEtherProxy",
+    "newrelicKey": "SECRET_KEY",
+    "newrelicVerbose": false
 }

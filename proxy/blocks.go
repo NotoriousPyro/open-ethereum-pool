@@ -55,11 +55,11 @@ func (s *ProxyServer) fetchBlockTemplate() {
     }
     
     newTemplate := BlockTemplate{
-        Header:                    reply[0],
+        Header:                  reply[0],
         Seed:                    reply[1],
-        Target:                    reply[2],
-        Height:                    height,
-        Difficulty:                diff,
+        Target:                  reply[2],
+        Height:                  height,
+        Difficulty:              diff,
         GetPendingBlockCache:    pendingReply,
     }
     

@@ -30,12 +30,12 @@ type JSONRpcResp struct {
 }
 
 type GetBalanceReply struct {
-    Unspent            int64    `json:"unspent"`
+    Unspent            int64        `json:"unspent"`
 }
 
 type ValidateAddress struct {
-    IsValid            bool        `json:"is_valid"`
-    TestNet            bool        `json:"testnet"`
+    IsValid            bool         `json:"is_valid"`
+    TestNet            bool         `json:"testnet"`
 }
 
 type GetBlockReply struct {
@@ -52,14 +52,14 @@ type GetBlockReply struct {
 }
 
 type MVSTx struct {
-    Hash        string        `json:"hash"`
-    Locktime    string        `json:"lock_time"`
-    Outputs     []MVSTxOutput `json:"outputs"`
+    Hash        string            `json:"hash"`
+    Locktime    string            `json:"lock_time"`
+    Outputs     []MVSTxOutput     `json:"outputs"`
 }
 
 type MVSTxOutput struct {
-    Address        string  `json:"address"`
-    Value          int64   `json:"value"`
+    Address     string       `json:"address"`
+    Value       int64        `json:"value"`
 }
 
 func (r *GetBlockReply) Confirmed() bool {

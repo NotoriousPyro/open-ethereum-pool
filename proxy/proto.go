@@ -10,27 +10,27 @@ type JSONRpcReq struct {
 
 type StratumReq struct {
     JSONRpcReq
-    Worker string `json:"worker"`
+    Worker    string            `json:"worker"`
 }
 
 type JSONPushMessage struct {
-    Id      int64       `json:"id"`
-    Version string      `json:"jsonrpc"`
-    Result  interface{} `json:"result"`
+    Id        int64             `json:"id"`
+    Version   string            `json:"jsonrpc"`
+    Result    interface{}       `json:"result"`
 }
 
 type JSONRpcResp struct {
-    Id        json.RawMessage    `json:"id"`
-    Version    string            `json:"jsonrpc"`
-    Result    interface{}        `json:"result"`
-    Error    interface{}         `json:"error,omitempty"`
+    Id         json.RawMessage  `json:"id"`
+    Version    string           `json:"jsonrpc"`
+    Result     interface{}      `json:"result"`
+    Error      interface{}      `json:"error,omitempty"`
 }
 
 type SubmitReply struct {
-    Status string `json:"status"`
+    Status     string           `json:"status"`
 }
 
 type ErrorReply struct {
-    Code    int    `json:"code"`
-    Message string `json:"message"`
+    Code       int              `json:"code"`
+    Message    string           `json:"message"`
 }

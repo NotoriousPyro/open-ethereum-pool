@@ -34,10 +34,10 @@ const minDepth = 16
 
 type BlockUnlocker struct {
     config        *UnlockerConfig
-    backend        *storage.RedisClient
-    rpc            *rpc.RPCClient
-    halt        bool
-    lastFail    error
+    backend       *storage.RedisClient
+    rpc           *rpc.RPCClient
+    halt          bool
+    lastFail      error
 }
 
 func NewBlockUnlocker(cfg *UnlockerConfig, backend *storage.RedisClient) *BlockUnlocker {
@@ -82,11 +82,11 @@ func (u *BlockUnlocker) Start() {
 }
 
 type UnlockResult struct {
-    maturedBlocks  []*storage.BlockData
-    orphanedBlocks []*storage.BlockData
-    orphans        int
-    uncles         int
-    blocks         int
+    maturedBlocks   []*storage.BlockData
+    orphanedBlocks  []*storage.BlockData
+    orphans         int
+    uncles          int
+    blocks          int
 }
 
 func (u *BlockUnlocker) unlockCandidates(candidates []*storage.BlockData) (*UnlockResult, error) {

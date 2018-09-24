@@ -38,9 +38,9 @@ type ProxyServer struct {
 }
 
 type Session struct {
-    s_id       int
-    ip         string
-    enc        *json.Encoder
+    s_id        int
+    ip          string
+    enc         *json.Encoder
 
     sync.Mutex
     conn        *net.TCPConn

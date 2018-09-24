@@ -13,34 +13,34 @@ import (
 )
 
 type Config struct {
-    Endpoint string `json:"endpoint"`
-    Password string `json:"password"`
-    Database int64  `json:"database"`
-    PoolSize int    `json:"poolSize"`
+    Endpoint   string   `json:"endpoint"`
+    Password   string   `json:"password"`
+    Database   int64    `json:"database"`
+    PoolSize   int      `json:"poolSize"`
 }
 
 type RedisClient struct {
-    client *redis.Client
-    prefix string
+    client   *redis.Client
+    prefix   string
 }
 
 type BlockData struct {
-    Height         int64    `json:"height"`
-    Timestamp      int64    `json:"timestamp"`
-    Difficulty     int64    `json:"difficulty"`
-    TotalShares    int64    `json:"shares"`
-    Uncle          bool     `json:"uncle"`
-    UncleHeight    int64    `json:"uncleHeight"`
-    Orphan         bool     `json:"orphan"`
-    Hash           string   `json:"hash"`
-    Nonce          string   `json:"-"`
-    PowHash        string   `json:"-"`
-    MixDigest      string   `json:"-"`
-    Reward         *big.Int `json:"-"`
-    ExtraReward    *big.Int `json:"-"`
-    ImmatureReward string   `json:"-"`
-    RewardString   string   `json:"reward"`
-    RoundHeight    int64    `json:"-"`
+    Height         int64      `json:"height"`
+    Timestamp      int64      `json:"timestamp"`
+    Difficulty     int64      `json:"difficulty"`
+    TotalShares    int64      `json:"shares"`
+    Uncle          bool       `json:"uncle"`
+    UncleHeight    int64      `json:"uncleHeight"`
+    Orphan         bool       `json:"orphan"`
+    Hash           string     `json:"hash"`
+    Nonce          string     `json:"-"`
+    PowHash        string     `json:"-"`
+    MixDigest      string     `json:"-"`
+    Reward         *big.Int   `json:"-"`
+    ExtraReward    *big.Int   `json:"-"`
+    ImmatureReward string     `json:"-"`
+    RewardString   string     `json:"reward"`
+    RoundHeight    int64      `json:"-"`
     candidateKey   string
     immatureKey    string
 }
@@ -67,15 +67,15 @@ func (b *BlockData) key() string {
 }
 
 type Miner struct {
-    LastBeat  int64 `json:"lastBeat"`
-    HR        int64 `json:"hr"`
-    Offline   bool  `json:"offline"`
-    startedAt int64
+    LastBeat    int64   `json:"lastBeat"`
+    HR          int64   `json:"hr"`
+    Offline     bool    `json:"offline"`
+    startedAt   int64
 }
 
 type Worker struct {
     Miner
-    TotalHR int64 `json:"hr2"`
+    TotalHR     int64   `json:"hr2"`
 }
 
 func NewRedisClient(cfg *Config, prefix string) *RedisClient {
