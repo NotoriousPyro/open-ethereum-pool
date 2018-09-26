@@ -46,3 +46,7 @@ Now just start the services you added using:
 If you get errors, please check folder permissions, missing folders, wallet is running, ports are open, and other common problems PRIOR to raising an issue. Issues raised with no prior debugging will be closed.
 
 To build the Orchestrator, use <code>make</code> after a fresh install or when you make a change.
+
+You can also set an entry in crontab for <code>misc/etp-payout-autoheal.sh</code> for if Redis is locked without pending payments. **Make sure you edit the file to set the correct "coin" that you have in the <code>.json</code> files and the right service name**
+
+    * * * * * /opt/scripts/etp-payout-autoheal.sh
