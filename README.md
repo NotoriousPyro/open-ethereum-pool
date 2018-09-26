@@ -31,7 +31,7 @@ Configure the <code>.json</code> files accordingly, setting the wallet username 
 
 Now use the <code>.service</code> files in <code>misc</code> to add the services to systemd. **Make sure you set the paths in these files**
 
-    cp examples/*.service /etc/systemd/system/
+    cp misc/*.service /etc/systemd/system/
     systemctl enable oep-etp-api
     systemctl enable oep-etp-stratum
     systemctl enable oep-etp-unlocker
