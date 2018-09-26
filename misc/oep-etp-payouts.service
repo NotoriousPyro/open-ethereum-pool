@@ -1,0 +1,10 @@
+[Unit]
+Description=OEP ETP Payout Service
+
+[Service]
+RestartSec=1
+WorkingDirectory=/opt/oep-etp
+ExecStart=/opt/oep-etp/build/bin/open-ethereum-pool payout.json
+
+[Install]
+WantedBy=multi-user.target

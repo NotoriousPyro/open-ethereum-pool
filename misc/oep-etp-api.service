@@ -1,0 +1,10 @@
+[Unit]
+Description=OEP ETP API Service
+
+[Service]
+RestartSec=1
+WorkingDirectory=/opt/oep-etp
+ExecStart=/opt/oep-etp/build/bin/open-ethereum-pool api.json
+
+[Install]
+WantedBy=multi-user.target

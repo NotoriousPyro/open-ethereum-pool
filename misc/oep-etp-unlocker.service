@@ -1,0 +1,10 @@
+[Unit]
+Description=OEP ETP Unlocker Service
+
+[Service]
+RestartSec=1
+WorkingDirectory=/opt/oep-etp
+ExecStart=/opt/oep-etp/build/bin/open-ethereum-pool unlocker.json
+
+[Install]
+WantedBy=multi-user.target
